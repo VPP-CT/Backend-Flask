@@ -41,6 +41,7 @@ def flights():
             "refundable": 'false'
         }
     }
+
     get_flights(data)
 
     return "/flights/?budget=xxx&seg=x&origin1=xxx&dest1=xxx&date1=xxxx-xx-xx"
