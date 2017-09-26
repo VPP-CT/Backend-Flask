@@ -103,7 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# pycharm
-.idea
-
 *.key
+
+.idea/
+
+latest_query.log
