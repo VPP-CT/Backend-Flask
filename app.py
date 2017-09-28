@@ -27,31 +27,30 @@ def flights():
     flight_data = flight_data_obj()
     flight_data.budget = request.args.get('budget')
     flight_data.seg = request.args.get('seg')
-    flight_data.orig1 = request.args.get('origin1')
-    flight_data.dest1 = request.args.get('dest1')
-    flight_data.date1 = request.args.get('date1')
+    # print (type(flight_data.seg))
+    flight_data.orig = []
+    flight_data.dest = []
+    flight_data.date = [] 
+    for x in range (1, int(flight_data.seg) + 1):
+        flight_data.orig.append(request.args.get('origin%d' % x))
+        flight_data.dest.append(request.args.get('dest%d' % x))
+        flight_data.date.append(request.args.get('date%d' % x))
     # end TODO
 
     # TODO: change the logging format accordingly based on the constructor.
     logging.warning(
-        "Budget:%s, Segment: %s\nOrigin1:%s, Destination1:%s, Date1:%s",
-        flight_data.budget,
-        flight_data.seg,
-        flight_data.orig1,
-        flight_data.dest1,
-        flight_data.date1)
-    # end TODO
+        "Budget:%s, Segment: %s\nOrigin1:%s, Destination1:%s, Date1:%s" % (flight_data.budget, flight_data.seg, \
+            str(flight_data.orig), str(flight_data.dest), str(flight_data.date))
+    )
 
+    # TODO: based on the len(constructed_data), add each segment
+    # into the request body as dict.
+    slice = [dict(origin=flight_data.orig[x],
+                     destination=flight_data.dest[x],
+                     date=flight_data.date[x]) for x in range(0, int(flight_data.seg))]
     data = {
         "request": {
-            "slice": [
-                # TODO: based on the len(constructed_data), add each segment
-                # into the request body as dict.
-                dict(origin=flight_data.orig1,
-                     destination=flight_data.dest1,
-                     date=flight_data.date1),
-                # end TODO
-            ],
+            "slice": slice,
             "passengers": dict(adultCount=1),
             "refundable": 'false'
         }
@@ -63,10 +62,35 @@ def flights():
 
 
 def get_flights(raw_input):
-    qpx.get(raw_input)
-
+    file = qpx.get(raw_input)
     logging.warning(qpx.data)
-    print(qpx.data, file=open('latest_query.log', 'w+'))
+
+    return_data = dict()
+    # len(qpx.data['tripOption']) 
+    # how many possible packages that the qpx.data have 
+    # we only need top 50
+    for x in range(5):
+        option = dict()
+        option['price'] = qpx.data['trips']['tripOption'][x]['saleTotal']
+        for y in range(len(qpx.data['trips']['tripOption'][x]['slice'])):
+            segment = dict()
+            for z in range(len(qpx.data['trips']['tripOption'][x]['slice'][y]['segment'])):
+                segment[z] = dict()
+                for a in range(len(qpx.data['trips']['tripOption'][x]['slice'][y]['segment'][z])):
+                    segs = qpx.data['trips']['tripOption'][x]['slice'][y]['segment'][z]
+                    stop = dict()
+                    stop['carrier'] = segs['flight']['carrier']
+                    stop['flight_number'] = segs['flight']['number']
+                    stop['arrivalTime']= segs['leg'][0]['arrivalTime']
+                    stop['departureTime'] = segs['leg'][0]['departureTime']
+                    stop['origin'] = segs['leg'][0]['origin']
+                    stop['destination'] = segs['leg'][0]['destination']
+                    stop['destinationTerminal'] = segs['leg'][0]['destinationTerminal']
+                    # stop['meal'] = segs['leg'][0]['meal']
+                    segment[z]['stop%d' % a] = stop
+            option['trip'] = segment
+        return_data[x] = option
+    print(return_data, file=open('latest_query.log', 'w+'))
 
     # TODO: re-format the data into JSON format. Remove all unnecessary
     # fields, and append a ranking field into it (now we could use price to
@@ -79,8 +103,8 @@ class flight_data_obj(object):
     """
     A class used to store flight data from user's raw input.
     """
-    pass
-
+    def __init__(self):
+        pass
 
 if __name__ == '__main__':
     app.run(debug=True)
