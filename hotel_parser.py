@@ -55,7 +55,6 @@ def parse_hotel(raw_data, location):
     """
     # TODO: Parse the data, make sure it is ready for constructing package.
     logging.warning(raw_data)
-    pass
 
 
 if __name__ == '__main__':
