@@ -61,15 +61,14 @@ def flights():
     return "/flights?budget=xxx&seg=x&origin1=xxx&dest1=xxx&date1=xxxx-xx-xx"
 
 
+
 def get_flights(raw_input):
     file = qpx.get(raw_input)
     logging.warning(qpx.data)
-
-    # len(qpx.data['tripOption']) 
-    # how many possible packages that the qpx.data have 
-    # we only need top 50
+    # re-formated JSON returned data
     return_data = dict()
-    for x in range(5):
+    # only return top 50 flight data 
+    for x in range(50):
         option = dict()
         option['price%d' % x] = qpx.data['trips']['tripOption'][x]['saleTotal']
         segment = dict()
@@ -89,13 +88,13 @@ def get_flights(raw_input):
             segment['%d' % y] = stops
         option['segment%d' % x] = segment
         return_data['option%d' % x] = option
-    print(return_data, file=open('latest_query.log', 'w+'))
+    print(return_data, file=open('top_query.log', 'w+'))
     print(qpx.data, file=open('query.log', 'w+'))
 
     # TODO: re-format the data into JSON format. Remove all unnecessary
     # fields, and append a ranking field into it (now we could use price to
     # rank them.)
-    return qpx.data
+    return return_data
     # end TODO
 
 
