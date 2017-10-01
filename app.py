@@ -65,32 +65,32 @@ def get_flights(raw_input):
     file = qpx.get(raw_input)
     logging.warning(qpx.data)
 
-    return_data = dict()
     # len(qpx.data['tripOption']) 
     # how many possible packages that the qpx.data have 
     # we only need top 50
+    return_data = dict()
     for x in range(5):
         option = dict()
-        option['price'] = qpx.data['trips']['tripOption'][x]['saleTotal']
+        option['price%d' % x] = qpx.data['trips']['tripOption'][x]['saleTotal']
+        segment = dict()
         for y in range(len(qpx.data['trips']['tripOption'][x]['slice'])):
-            segment = dict()
+            stops = dict()
             for z in range(len(qpx.data['trips']['tripOption'][x]['slice'][y]['segment'])):
-                segment[z] = dict()
-                for a in range(len(qpx.data['trips']['tripOption'][x]['slice'][y]['segment'][z])):
-                    segs = qpx.data['trips']['tripOption'][x]['slice'][y]['segment'][z]
-                    stop = dict()
-                    stop['carrier'] = segs['flight']['carrier']
-                    stop['flight_number'] = segs['flight']['number']
-                    stop['arrivalTime']= segs['leg'][0]['arrivalTime']
-                    stop['departureTime'] = segs['leg'][0]['departureTime']
-                    stop['origin'] = segs['leg'][0]['origin']
-                    stop['destination'] = segs['leg'][0]['destination']
-                    stop['destinationTerminal'] = segs['leg'][0]['destinationTerminal']
-                    # stop['meal'] = segs['leg'][0]['meal']
-                    segment[z]['stop%d' % a] = stop
-            option['trip'] = segment
-        return_data[x] = option
+                segs = qpx.data['trips']['tripOption'][x]['slice'][y]['segment'][z]
+                stop = dict()
+                stop['carrier'] = segs['flight']['carrier']
+                stop['flight_number'] = segs['flight']['number']
+                stop['arrivalTime']= segs['leg'][0]['arrivalTime']
+                stop['departureTime'] = segs['leg'][0]['departureTime']
+                stop['origin'] = segs['leg'][0]['origin']
+                stop['destination'] = segs['leg'][0]['destination']
+                stop['destinationTerminal'] = segs['leg'][0]['destinationTerminal']
+                stops["%d" % z] = stop
+            segment['%d' % y] = stops
+        option['segment%d' % x] = segment
+        return_data['option%d' % x] = option
     print(return_data, file=open('latest_query.log', 'w+'))
+    print(qpx.data, file=open('query.log', 'w+'))
 
     # TODO: re-format the data into JSON format. Remove all unnecessary
     # fields, and append a ranking field into it (now we could use price to
