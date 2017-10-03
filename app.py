@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import logging
+import json
 
 from flask import Flask, request
 from google_flight import google_flight_api
@@ -14,7 +15,7 @@ qpx = google_flight_api.GoogleFlight(open("apikey.key", "r").read())
 
 @app.route('/')
 def index():
-    return 'try /flights'
+    return 'TRY /flights OR /flights?budget=xxx&seg=x&origin1=xxx&dest1=xxx&date1=xxxx-xx-xx'
 
 
 @app.route('/flights')
@@ -68,7 +69,7 @@ def get_flights(raw_input):
     # re-formated JSON returned data
     return_data = dict()
     # only return top 50 flight data 
-    for x in range(50):
+    for x in range(200):
         option = dict()
         option['price%d' % x] = qpx.data['trips']['tripOption'][x]['saleTotal']
         segment = dict()
@@ -83,12 +84,13 @@ def get_flights(raw_input):
                 stop['departureTime'] = segs['leg'][0]['departureTime']
                 stop['origin'] = segs['leg'][0]['origin']
                 stop['destination'] = segs['leg'][0]['destination']
-                stop['destinationTerminal'] = segs['leg'][0]['destinationTerminal']
+                # stop['destinationTerminal'] = segs['leg'][0]['destinationTerminal']
                 stops["%d" % z] = stop
             segment['%d' % y] = stops
         option['segment%d' % x] = segment
         return_data['option%d' % x] = option
-    print(return_data, file=open('top_query.log', 'w+'))
+    formated_return_data = json.dumps(return_data,  sort_keys=True, indent=4, separators=(',', ': '))
+    print(formated_return_data, file=open('top_query.log', 'w+'))
     print(qpx.data, file=open('query.log', 'w+'))
 
     # TODO: re-format the data into JSON format. Remove all unnecessary
