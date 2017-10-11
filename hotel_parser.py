@@ -28,9 +28,7 @@ def search_hotels(location):
     """
     # TODO: The Expedia API only allows location as latitude and longitude input
     # Find a way to convert location str input into the GEO data.
-    print ("HIIIIIII")
-    import geocoder
-    g = geocoder.google('Mountain View, CA')
+    g = geocoder.google(location)
 
     param = {'sortOrder': 'price',
              'pageIndex': 0,
@@ -90,5 +88,5 @@ def parse_hotel(raw_data, location):
 
 
 if __name__ == '__main__':
-    raw_data = search_hotels("Tokyo")
-    parse_hotel(raw_data, "Tokyo")
+    raw_data = search_hotels("Mountain View, CA")
+    parse_hotel(raw_data, "Mountain View, CA")
