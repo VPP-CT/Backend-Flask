@@ -22,7 +22,7 @@ def search_hotels(location):
     Returns:
         A JSON object which contains hotel information.
     """
-    # TODO: The Expedia API only allows location as latitude and longitude input.
+    # TODO: The Expedia API only allows location as latitude and longitude input
     # Find a way to convert location str input into the GEO data.
     param = {'sortOrder': 'price',
              'pageIndex': 0,
