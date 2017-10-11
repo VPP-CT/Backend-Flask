@@ -11,7 +11,7 @@ import json
 # from pygeocoder import Geocoder
 import geocoder
 
-returnedNum = 5  # only return top 50 flight data
+returnedNum = 50 # only return top 50 flight data
 
 
 def search_hotels(location):
