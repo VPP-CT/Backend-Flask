@@ -1,0 +1,38 @@
+#Query Format
+for "http://127.0.0.1:5000/flights?budget=1222&seg=2&origin1=JFK&dest1=SFO&date1=2017-10-20&origin1=JFK&dest1=SFO&date1=2017-10-20&origin2=SFO&dest2=LAX&date2=2017-10-30"
+budget = $1222
+segment = 2 // two trip(JFK-SFO & SFO-LAX)
+
+"option131": {                      // Option 131 
+        "price": "USD310.50",       // total price for this option 
+        "segment131": {   
+            "trip0": {              // first trip: JFK-SFO
+                "stop0": {          // first stopover in first trip
+                    "arrivalTime": "2017-10-20T12:10-07:00",
+                    "carrier": "VX",
+                    "departureTime": "2017-10-20T09:33-04:00",
+                    "destination": "LAS",
+                    "flight_number": "1251",
+                    "origin": "JFK"
+                },
+                "stop1": {          // second stopover in first trip
+                    "arrivalTime": "2017-10-20T15:26-07:00",
+                    "carrier": "VX",
+                    "departureTime": "2017-10-20T13:50-07:00",
+                    "destination": "SFO",
+                    "flight_number": "1905",
+                    "origin": "LAS"
+                }
+            },
+            "trip1": {              // second trip: SFO-LAX
+                "stop0": {          // only one stop in second trip
+                    "arrivalTime": "2017-10-30T15:50-07:00",
+                    "carrier": "VX",
+                    "departureTime": "2017-10-30T14:24-07:00",
+                    "destination": "LAX",
+                    "flight_number": "1928",
+                    "origin": "SFO"
+                }
+            }
+        }
+    },
