@@ -2,21 +2,35 @@
 from __future__ import print_function
 
 import logging
+import json
 
 import flight_parser
+import hotel_parser
 
-from flask import Flask, request
-from google_flight import google_flight_api
+from flask import Flask, jsonify, Response, request
+from iata_codes.cities import IATACodesClient
+from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
 
-# Google QPX lib
-qpx = google_flight_api.GoogleFlight(open("apikey.key", "r").read())
+# IATA database, convert between airport IATA and city name
+iata_client = IATACodesClient(open("iata.key", "r").read())
+# example: iata_client.get(code='MOW')), iata_client.get(name='Moscow'))
+
+# convert city name to geo
+geo = Nominatim()
 
 
 @app.route('/')
 def index():
-    return 'TRY /flights OR /flights?budget=xxx&seg=x&origin1=xxx&dest1=xxx&date1=xxxx-xx-xx'
+    usage = """
+    /flights?budget=xxx&seg=x&origin1=xxx&dest1=xxx&date1=xxxx-xx-xx<br>
+    /hotels?city=xxx&checkin=xxxx-xx-xx&checkout=xxxx-xx-xx<br><br>
+    ex:<br>
+    /hotels?city=new%20york&checkin=2017-11-05&checkout=2017-11-10<br>
+    /flights?budget=2000&seg=1&origin1=nyc&dest1=sfo&date1=2017-10-31<br>
+    """
+    return usage
 
 
 @app.route('/flights')
@@ -57,14 +71,45 @@ def flights():
         }
     }
 
-    flight_parser.get_flights(data)
+    return jsonify(flight_parser.get_flights(data))
 
-    return "/flights?budget=xxx&seg=x&origin1=xxx&dest1=xxx&date1=xxxx-xx-xx"
+
+@app.route('/hotels')
+def hotels():
+    """Use hotel parser to fetch hotel data from APIs
+
+    This function would get basic information from user input, then utilize
+    hotel_parser lib to pass those data to API for get hotel data.
+
+    Args:
+
+    Returns:
+        A json contains all possible hotel options.
+
+    """
+    hotel_data = hotel_data_obj()
+    hotel_data.checkin_date = request.args.get('checkin')
+    hotel_data.checkout_date = request.args.get('checkout')
+
+    location = geo.geocode(request.args.get('city'))
+    hotel_data.latitude = location.latitude
+    hotel_data.longitude = location.longitude
+
+    return jsonify(hotel_parser.search_hotels(hotel_data))
 
 
 class flight_data_obj(object):
     """
     A class used to store flight data from user's raw input.
+    """
+
+    def __init__(self):
+        pass
+
+
+class hotel_data_obj(object):
+    """
+    A class used to store hotel data from user's raw input.
     """
 
     def __init__(self):
