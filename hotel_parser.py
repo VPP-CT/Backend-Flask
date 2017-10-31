@@ -6,7 +6,6 @@ server.
 from __future__ import print_function
 
 import requests
-import logging
 import json
 
 returnedNum = 100  # only return top 50 flight data
@@ -25,7 +24,6 @@ def search_hotels(hotel_data):
         A JSON object which contains hotel information.
 
     """
-    logging.warning(hotel_data.checkin_date)
     param = {'sortOrder': 'price',
              'pageIndex': 0,
              'enableSponsoredListings': 'false',
