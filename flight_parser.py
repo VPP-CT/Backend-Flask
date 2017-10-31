@@ -1,8 +1,5 @@
 from __future__ import print_function
 
-import logging
-import json
-
 from google_flight import google_flight_api
 
 returnedNum = 100
@@ -24,10 +21,8 @@ def get_flights(raw_input):
     # Google QPX lib
     qpx = google_flight_api.GoogleFlight(open("apikey.key", "r").read())
     qpx.get(raw_input)
-    logging.warning(qpx.data)
 
     return_data = dict()
-
     for x in range(returnedNum):
         option = dict()
         option['price'] = qpx.data['trips']['tripOption'][x]['saleTotal']

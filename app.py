@@ -2,12 +2,11 @@
 from __future__ import print_function
 
 import logging
-import json
 
 import flight_parser
 import hotel_parser
 
-from flask import Flask, jsonify, Response, request
+from flask import Flask, jsonify, request, render_template
 from iata_codes.cities import IATACodesClient
 from geopy.geocoders import Nominatim
 
@@ -23,14 +22,13 @@ geo = Nominatim()
 
 @app.route('/')
 def index():
-    usage = """
-    /flights?budget=xxx&seg=x&origin1=xxx&dest1=xxx&date1=xxxx-xx-xx<br>
-    /hotels?city=xxx&checkin=xxxx-xx-xx&checkout=xxxx-xx-xx<br><br>
-    ex:<br>
-    /hotels?city=new%20york&checkin=2017-11-05&checkout=2017-11-10<br>
-    /flights?budget=2000&seg=1&origin1=nyc&dest1=sfo&date1=2017-10-31<br>
-    """
-    return usage
+    return render_template('index.html')
+
+
+@app.route('/package')
+def package():
+    flight_data = flight_data_obj()
+    flights(flight_data)
 
 
 @app.route('/flights')
@@ -51,13 +49,6 @@ def flights():
         flight_data.orig.append(request.args.get('origin%d' % x))
         flight_data.dest.append(request.args.get('dest%d' % x))
         flight_data.date.append(request.args.get('date%d' % x))
-
-    logging.warning(
-        "Budget:%s, Segment: %s\nOrigin1:%s, Destination1:%s, Date1:%s" % (flight_data.budget,
-                                                                           flight_data.seg,
-                                                                           str(flight_data.orig),
-                                                                           str(flight_data.dest),
-                                                                           str(flight_data.date)))
 
     # based on the len(constructed_data), add each segment
     # into the request body as dict.
@@ -116,4 +107,4 @@ class hotel_data_obj(object):
         pass
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
