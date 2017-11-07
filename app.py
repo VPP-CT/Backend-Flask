@@ -1,16 +1,16 @@
 #!flask/bin/python
 from __future__ import print_function
 
-import logging
-
 import flight_parser
 import hotel_parser
 
 from flask import Flask, jsonify, request, render_template
+from flask_cors import CORS
 from iata_codes.cities import IATACodesClient
 from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
+CORS(app)
 
 # IATA database, convert between airport IATA and city name
 iata_client = IATACodesClient(open("iata.key", "r").read())
@@ -105,16 +105,6 @@ class hotel_data_obj(object):
 
     def __init__(self):
         pass
-
-
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
-    response.headers.add('Access-Control-Allow-Headers',
-                         'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST')
-    response.headers.add("Access-Control-Allow-Credentials","true");
-    return response
 
 
 if __name__ == '__main__':
