@@ -41,7 +41,7 @@ def packages():
     # 50% flight& 50% hotel(2 packages)
     percent_flight_index = 'option_0'
     flag = 1
-    for key,value in flight_result.iteritems():
+    for key, value in flight_result.iteritems():
         if float(value['price'][3:]) >= float(request.args.get('budget')) / 2:
             percent_flight_index = key
             flag = 0
@@ -50,13 +50,14 @@ def packages():
         percent_flight_index = 'option_%d' % (len(flight_result) - 1)
     for x in range(index + each_option_num):
         package_data['flight_%d' % x] = flight_result[percent_flight_index]
-        package_data['hotel_%d' % x] = hotels_package(flight_result, int(percent_flight_index[7:]), x, 0.5)
+        package_data['hotel_%d' % x] = hotels_package(
+            flight_result, int(percent_flight_index[7:]), x, 0.5)
     index += each_option_num
     # 70% flight& 30% hotel(2 packages)
     percent_flight_index = 'option_0'
     flag = 1
-    for key,value in flight_result.iteritems():
-        if float(value['price'][3:]) >= float(request.args.get('budget')) * 7 / 10 :
+    for key, value in flight_result.iteritems():
+        if float(value['price'][3:]) >= float(request.args.get('budget')) * 7 / 10:
             percent_flight_index = key
             flag = 0
             break
@@ -64,7 +65,8 @@ def packages():
         percent_flight_index = 'option_%d' % (len(flight_result) - 1)
     for x in range(index + each_option_num):
         package_data['flight_%d' % x] = flight_result[percent_flight_index]
-        package_data['hotel_%d' % x] = hotels_package(flight_result, int(percent_flight_index[7:]), x, 0.3)
+        package_data['hotel_%d' % x] = hotels_package(
+            flight_result, int(percent_flight_index[7:]), x, 0.3)
 
     return jsonify(package_data)
 
@@ -74,36 +76,42 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent):
     option_num : corresponding flight option number
     hotel_option_num : which hotel should we return- for example : first and second one
     percent: price constrain for the hotel option
-    
-    example query:    
+
+    example query:
     http://127.0.0.1:5000/packages?budget=2000&seg=3&origin1=nyc&dest1=sfo&date1=2017-11-15&origin2=sfo&dest2=lax&date2=2017-11-20&origin3=lax&dest3=nyc&date3=2017-11-25
     """
     hotel_results = dict()
     for x in range(len(flight_result['option_%d' % option_num]['trips']) - 1):
-            trip_cur = flight_result['option_%d' % option_num]['trips']['trip_%d' % x]
-            trip_next = flight_result['option_%d' % option_num]['trips']['trip_%d' % (x + 1)]
-            hotel_data = hotel_data_obj()
-            hotel_data.checkin_date = trip_cur['stop_%d' %(len(trip_cur) - 2)]['arrivalTime'][:10]
-            hotel_data.checkout_date = trip_next['stop_0']['departureTime'][:10]
-            location = geo.geocode(request.args.get('dest%d' % x))
-            hotel_data.latitude = location.latitude
-            hotel_data.longitude = location.longitude
-            hotel_result = hotel_parser.search_hotels(hotel_data)
-            if percent == 1:
-                hotel_results['trip_%d' % x] = hotel_result['hotel_%d' % hotel_option_num]
-            else:
-                flag = 1
-                percent_hotel_index = 'hotel_0'
-                for key,value in hotel_result.iteritems():
-                    if float(value['rateWithTax'][3:]) >= float(request.args.get('budget')) * percent:
-                        percent_hotel_index = key
-                        flag = 0
-                        break
-                if flag == 1:
-                    percent_hotel_index = 'hotel_%d' % (len(hotel_result) - 1)
-                final_hotel_index = 'hotel_%d' % (int(percent_hotel_index[7:]) + hotel_option_num)
-                hotel_results['trip_%d' % x] = hotel_result[final_hotel_index]
+        trip_cur = flight_result['option_%d' %
+                                 option_num]['trips']['trip_%d' % x]
+        trip_next = flight_result['option_%d' %
+                                  option_num]['trips']['trip_%d' % (x + 1)]
+        hotel_data = hotel_data_obj()
+        hotel_data.checkin_date = trip_cur[
+            'stop_%d' % (len(trip_cur) - 2)]['arrivalTime'][:10]
+        hotel_data.checkout_date = trip_next['stop_0']['departureTime'][:10]
+        location = geo.geocode(request.args.get('dest%d' % x))
+        hotel_data.latitude = location.latitude
+        hotel_data.longitude = location.longitude
+        hotel_result = hotel_parser.search_hotels(hotel_data)
+        if percent == 1:
+            hotel_results['trip_%d' % x] = hotel_result[
+                'hotel_%d' % hotel_option_num]
+        else:
+            flag = 1
+            percent_hotel_index = 'hotel_0'
+            for key, value in hotel_result.iteritems():
+                if float(value['rateWithTax'][3:]) >= float(request.args.get('budget')) * percent:
+                    percent_hotel_index = key
+                    flag = 0
+                    break
+            if flag == 1:
+                percent_hotel_index = 'hotel_%d' % (len(hotel_result) - 1)
+            final_hotel_index = 'hotel_%d' % (
+                int(percent_hotel_index[7:]) + hotel_option_num)
+            hotel_results['trip_%d' % x] = hotel_result[final_hotel_index]
     return hotel_results
+
 
 def flight():
     # initialize data from RESTful call by construct a flight_data_obj
@@ -135,8 +143,9 @@ def flight():
             "maxPrice": flight_data.budget
         }
     }
-    
+
     return flight_parser.get_flights(data)
+
 
 @app.route('/flights')
 def flights():
