@@ -29,7 +29,7 @@ def index():
 
 @app.route('/packages')
 def packages():
-    flight_result = flights()
+    flight_result = flight()
     package_data = dict()
     # cheapest flight& cheapest hotel(2 packages)
     index = 0
@@ -105,6 +105,39 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent):
                 hotel_results['trip_%d' % x] = hotel_result[final_hotel_index]
     return hotel_results
 
+def flight():
+    # initialize data from RESTful call by construct a flight_data_obj
+    #
+    # Create a constructor which could dynamically construct the
+    # flight_data_obj by the given segment number. Each segment should contain
+    # a orig, dest, and date.
+    flight_data = flight_data_obj()
+    flight_data.budget = "USD" + request.args.get('budget')
+    flight_data.seg = request.args.get('seg')
+
+    flight_data.orig = []
+    flight_data.dest = []
+    flight_data.date = []
+    for x in range(1, int(flight_data.seg) + 1):
+        flight_data.orig.append(request.args.get('origin%d' % x))
+        flight_data.dest.append(request.args.get('dest%d' % x))
+        flight_data.date.append(request.args.get('date%d' % x))
+
+    # based on the len(constructed_data), add each segment
+    # into the request body as dict.
+    slice = [dict(origin=flight_data.orig[x], destination=flight_data.dest[x],
+                  date=flight_data.date[x]) for x in range(0, int(flight_data.seg))]
+    data = {
+        "request": {
+            "slice": slice,
+            "passengers": dict(adultCount=1),
+            "refundable": 'false',
+            "maxPrice": flight_data.budget
+        }
+    }
+
+    # return jsonify(flight_parser.get_flights(data))
+    return flight_parser.get_flights(data)
 
 @app.route('/flights')
 def flights():
@@ -138,8 +171,8 @@ def flights():
         }
     }
 
-    # return jsonify(flight_parser.get_flights(data))
-    return flight_parser.get_flights(data)
+    return jsonify(flight_parser.get_flights(data))
+    # return flight_parser.get_flights(data)
 
 
 @app.route('/hotels')
