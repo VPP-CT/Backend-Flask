@@ -8,8 +8,10 @@ from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from iata_codes.cities import IATACodesClient
 from geopy.geocoders import Nominatim
+from collections import OrderedDict
 
 app = Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False
 CORS(app)
 
 # IATA database, convert between airport IATA and city name
@@ -78,7 +80,7 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent):
     percent: price constrain for the hotel option
 
     example query:
-    http://127.0.0.1:5000/packages?budget=2000&seg=3&origin1=nyc&dest1=sfo&date1=2017-11-15&origin2=sfo&dest2=lax&date2=2017-11-20&origin3=lax&dest3=nyc&date3=2017-11-25
+    http://0.0.0.0:80/packages?budget=2000&seg=3&origin1=nyc&dest1=sfo&date1=2017-11-15&origin2=sfo&dest2=lax&date2=2017-11-20&origin3=lax&dest3=nyc&date3=2017-11-25
     """
     hotel_results = dict()
     for x in range(len(flight_result['option_%d' % option_num]['trips']) - 1):
@@ -178,8 +180,9 @@ def flights():
             "maxPrice": flight_data.budget
         }
     }
-
-    return jsonify(flight_parser.get_flights(data))
+    flights_result = flight_parser.get_flights(data)
+    flights_ordered = [OrderedDict(sorted(flights_result.iteritems(), key=lambda k : int(k[0][7:])))]
+    return jsonify(flights_ordered)
 
 
 @app.route('/hotels')
@@ -203,7 +206,10 @@ def hotels():
     hotel_data.latitude = location.latitude
     hotel_data.longitude = location.longitude
 
-    return jsonify(hotel_parser.search_hotels(hotel_data))
+    hotels_result = hotel_parser.search_hotels(hotel_data)
+    hotels_ordered = [OrderedDict(sorted(hotels_result.iteritems(), key=lambda k : int(k[0][6:])))]
+
+    return jsonify(hotels_ordered)
 
 
 class flight_data_obj(object):
