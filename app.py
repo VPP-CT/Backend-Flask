@@ -106,16 +106,6 @@ class hotel_data_obj(object):
     def __init__(self):
         pass
 
-"""
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers',
-                         'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST')
-    response.headers.add("Access-Control-Allow-Credentials","true");
-    return response
-"""
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
