@@ -11,7 +11,6 @@ from iata_codes.cities import IATACodesClient
 from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
-# app.config['JSON_SORT_KEYS'] = False
 
 # IATA database, convert between airport IATA and city name
 iata_client = IATACodesClient(open("iata.key", "r").read())
@@ -69,10 +68,16 @@ def packages():
 
     return jsonify(package_data)
 
-# option_num : corresponding flight option number
-# hotel_option_num : which hotel should we return- for example : first and second one
-# percent: price constrain for the hotel option
+
 def hotels_package(flight_result, option_num, hotel_option_num, percent):
+    """
+    option_num : corresponding flight option number
+    hotel_option_num : which hotel should we return- for example : first and second one
+    percent: price constrain for the hotel option
+    
+    example query:    
+    http://127.0.0.1:5000/packages?budget=2000&seg=3&origin1=nyc&dest1=sfo&date1=2017-11-15&origin2=sfo&dest2=lax&date2=2017-11-20&origin3=lax&dest3=nyc&date3=2017-11-25
+    """
     hotel_results = dict()
     for x in range(len(flight_result['option_%d' % option_num]['trips']) - 1):
             trip_cur = flight_result['option_%d' % option_num]['trips']['trip_%d' % x]
@@ -99,8 +104,6 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent):
                 final_hotel_index = 'hotel_%d' % (int(percent_hotel_index[7:]) + hotel_option_num)
                 hotel_results['trip_%d' % x] = hotel_result[final_hotel_index]
     return hotel_results
-
-# http://127.0.0.1:5000/packages?budget=2000&seg=3&origin1=nyc&dest1=sfo&date1=2017-11-15&origin2=sfo&dest2=lax&date2=2017-11-20&origin3=lax&dest3=nyc&date3=2017-11-25
 
 
 @app.route('/flights')
