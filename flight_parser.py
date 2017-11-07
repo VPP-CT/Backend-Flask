@@ -2,9 +2,6 @@ from __future__ import print_function
 
 from google_flight import google_flight_api
 
-returnedNum = 200  # only return top 50 flight data
-
-
 def get_flights(raw_input):
     # type: (str) -> dict
     """Re-format the data into JSON format.
@@ -23,7 +20,7 @@ def get_flights(raw_input):
     qpx.get(raw_input)
 
     return_data = dict()
-    for x in range(returnedNum):
+    for x in range(len(qpx.data)):
         option = dict()
         option['price'] = qpx.data['trips']['tripOption'][x]['saleTotal']
         segment = dict()

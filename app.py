@@ -9,6 +9,8 @@ from flask_cors import CORS
 from iata_codes.cities import IATACodesClient
 from geopy.geocoders import Nominatim
 
+import os
+
 app = Flask(__name__)
 CORS(app)
 
@@ -225,4 +227,4 @@ class hotel_data_obj(object):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 80)), debug=True)
