@@ -135,8 +135,7 @@ def flight():
             "maxPrice": flight_data.budget
         }
     }
-
-    # return jsonify(flight_parser.get_flights(data))
+    
     return flight_parser.get_flights(data)
 
 @app.route('/flights')
@@ -172,7 +171,6 @@ def flights():
     }
 
     return jsonify(flight_parser.get_flights(data))
-    # return flight_parser.get_flights(data)
 
 
 @app.route('/hotels')
