@@ -2,7 +2,7 @@ from __future__ import print_function
 
 from google_flight import google_flight_api
 
-returnedNum = 100
+returnedNum = 200  # only return top 50 flight data
 
 
 def get_flights(raw_input):
@@ -40,12 +40,12 @@ def get_flights(raw_input):
                 stop['departureTime'] = segs['leg'][0]['departureTime']
                 stop['origin'] = segs['leg'][0]['origin']
                 stop['destination'] = segs['leg'][0]['destination']
-                stops["stop%d" % z] = stop
+                stops["stop_%d" % z] = stop
+            stops["stop_number"] = len(qpx.data['trips']['tripOption'][x]['slice'][y]['segment'])
+            segment['trip_%d' % y] = stops
 
-            segment['trip%d' % y] = stops
-
-        option['segment%d' % x] = segment
-        return_data['option%d' % x] = option
+        option['trips'] = segment
+        return_data['option_%d' % x] = option
 
     """ For debug only
 
