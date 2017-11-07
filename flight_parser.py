@@ -20,7 +20,7 @@ def get_flights(raw_input):
     qpx.get(raw_input)
 
     return_data = dict()
-    for x in range(len(qpx.data)):
+    for x in range(len(qpx.data['trips']['tripOption'])):
         option = dict()
         option['price'] = qpx.data['trips']['tripOption'][x]['saleTotal']
         segment = dict()
