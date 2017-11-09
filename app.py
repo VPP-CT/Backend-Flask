@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import flight_parser
 import hotel_parser
+import pdb
 
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
@@ -37,9 +38,9 @@ def packages():
 
     for x in range(each_option_num):
         package_data['flight_%d' % x] = flight_result['option_0']
-        package_data['hotel_%d' % x] = hotels_package(flight_result, 0, x, 1)
+        package_data['hotel_%d' % x] = hotels_package(flight_result, 0, x, 1, "find_cheapest")
 
-    # cheapest flight with non stopover
+    # cheapest flight with non stopover && cheapest hotel with closest distance to the center 
     nonstop_flight_index = 'option_0'
     for key, value in flight_result.iteritems():
         nonstop = True
@@ -53,43 +54,59 @@ def packages():
             break
     for x in range(each_option_num):
         package_data['flight_%d' % (x + each_option_num)] = flight_result[nonstop_flight_index]
-        package_data['hotel_%d' % (x + each_option_num)] = hotels_package(flight_result, int(nonstop_flight_index[7:]), x, 1)
+        package_data['hotel_%d' % (x + each_option_num)] = hotels_package(flight_result, int(nonstop_flight_index[7:]), x, 1, "find_closest")
 
-
-    # # 50% flight& 50% hotel(2 packages)
-    # percent_flight_index = 'option_0'
-    # flag = 1
-    # for key, value in flight_result.iteritems():
-    #     if float(value['price'][3:]) >= float(request.args.get('budget')) / 2:
-    #         percent_flight_index = key
-    #         flag = 0
-    #         break
-    # if flag == 1:
-    #     percent_flight_index = 'option_%d' % (len(flight_result) - 1)
-    # for x in range(index + each_option_num):
-    #     package_data['flight_%d' % x] = flight_result[percent_flight_index]
-    #     package_data['hotel_%d' % x] = hotels_package(
-    #         flight_result, int(percent_flight_index[7:]), x, 0.5)
-    # index += each_option_num
-    # # 70% flight& 30% hotel(2 packages)
-    # percent_flight_index = 'option_0'
-    # flag = 1
-    # for key, value in flight_result.iteritems():
-    #     if float(value['price'][3:]) >= float(request.args.get('budget')) * 7 / 10:
-    #         percent_flight_index = key
-    #         flag = 0
-    #         break
-    # if flag == 1:
-    #     percent_flight_index = 'option_%d' % (len(flight_result) - 1)
-    # for x in range(index + each_option_num):
-    #     package_data['flight_%d' % x] = flight_result[percent_flight_index]
-    #     package_data['hotel_%d' % x] = hotels_package(
-    #         flight_result, int(percent_flight_index[7:]), x, 0.3)
+    # shortest flight && starRating more than 3 hotel
+    shortest_flight_index = 'option_0'
+    shortest_time = float('inf')
+    for key, value in flight_result.iteritems():
+        if float(flight_result[key]['duration']) < shortest_time :
+            shortest_time = float(flight_result[key]['duration'])
+            shortest_flight_index = key
+    # # print("the shortest_flight_index is", shortest_flight_index)
+    # print("????????", flight_result[shortest_flight_index])
+    # for x in range(each_option_num):
+    #     package_data['flight_%d' % (x + 4)] = flight_result[shortest_flight_index]
+    #     package_data['hotel_%d' % (x + 4)] = hotels_package(flight_result, int(shortest_flight_index[7:]), x, 1, "find_star")
 
     return jsonify(package_data)
 
+'''
+    - This part of code is for the price distribution diversity for both flight& hotel.
+    - save it for later
 
-def hotels_package(flight_result, option_num, hotel_option_num, percent):
+    # 50% flight& 50% hotel(2 packages)
+    percent_flight_index = 'option_0'
+    flag = 1
+    for key, value in flight_result.iteritems():
+        if float(value['price'][3:]) >= float(request.args.get('budget')) / 2:
+            percent_flight_index = key
+            flag = 0
+            break
+    if flag == 1:
+        percent_flight_index = 'option_%d' % (len(flight_result) - 1)
+    for x in range(index + each_option_num):
+        package_data['flight_%d' % x] = flight_result[percent_flight_index]
+        package_data['hotel_%d' % x] = hotels_package(
+            flight_result, int(percent_flight_index[7:]), x, 0.5)
+    index += each_option_num
+    # 70% flight& 30% hotel(2 packages)
+    percent_flight_index = 'option_0'
+    flag = 1
+    for key, value in flight_result.iteritems():
+        if float(value['price'][3:]) >= float(request.args.get('budget')) * 7 / 10:
+            percent_flight_index = key
+            flag = 0
+            break
+    if flag == 1:
+        percent_flight_index = 'option_%d' % (len(flight_result) - 1)
+    for x in range(index + each_option_num):
+        package_data['flight_%d' % x] = flight_result[percent_flight_index]
+        package_data['hotel_%d' % x] = hotels_package(
+            flight_result, int(percent_flight_index[7:]), x, 0.3)
+'''
+
+def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose):
     """
     option_num : corresponding flight option number
     hotel_option_num : which hotel should we return- for example : first and second one
@@ -105,11 +122,35 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent):
         hotel_data = hotel_data_obj()
         hotel_data.checkin_date = trip_cur['stop_%d' % (len(trip_cur) - 2)]['arrivalTime'][:10]
         hotel_data.checkout_date = trip_next['stop_0']['departureTime'][:10]
-        location = geo.geocode(request.args.get('dest%d' % x))
+        location = geo.geocode(trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
         hotel_data.latitude = location.latitude
         hotel_data.longitude = location.longitude
         hotel_result = hotel_parser.search_hotels(hotel_data)
-        hotel_results['trip_%d' % x] = hotel_result['hotel_%d' % hotel_option_num]
+        if purpose == "find_cheapest":
+            hotel_results['trip_%d' % x] = hotel_result['hotel_%d' % hotel_option_num]
+        if purpose == "find_closest":
+            # print("hotel result is", hotel_result)
+            closest_hotel_index = 'hotel_0'
+            minimal_distance_hotel = float('inf')
+            for key, value in hotel_result.iteritems():
+                if float(hotel_result[key]['distanceFromCenter']) < minimal_distance_hotel:
+                    closest_hotel_index = key
+                    minimal_distance_hotel = float(hotel_result[key]['distanceFromCenter'])
+                if float(hotel_result[key]['distanceFromCenter']) < 4.0:
+                    closest_hotel_index = key
+                    break
+            hotel_results['trip_%d' % x] = hotel_result['hotel_%d' % (int(closest_hotel_index[6:]) + hotel_option_num)]
+        if purpose == "find_star":
+            pdb.set_trace()
+            print("!!!!!!!!!!!!!!!!",hotel_result)
+            star_hotel_index = 'hotel_0'
+            print("??starRating is", star_hotel_index)
+            for key, value in hotel_result.iteritems():
+                if int(hotel_result[key]['starRating']) >= 3:
+                    star_hotel_index = key
+                    print("!!starRating is", star_hotel_index)
+                    break
+            hotel_results['trip_%d' % x] = hotel_result['hotel_%d' % (int(star_hotel_index[6:]) + hotel_option_num)]
         # if percent == 1:
         #     hotel_results['trip_%d' % x] = hotel_result[
         #         'hotel_%d' % hotel_option_num]

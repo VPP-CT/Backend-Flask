@@ -2,6 +2,8 @@ from __future__ import print_function
 
 from google_flight import google_flight_api
 
+import arrow
+
 returnedNum = 200  # only return top 50 flight data
 
 
@@ -23,7 +25,8 @@ def get_flights(raw_input):
     qpx.get(raw_input)
 
     return_data = dict()
-    for x in range(returnedNum):
+    for x in range(len(qpx.data['trips']['tripOption'])):
+        duration = 0
         option = dict()
         option['price'] = qpx.data['trips']['tripOption'][x]['saleTotal']
         segment = dict()
@@ -43,7 +46,12 @@ def get_flights(raw_input):
                 stops["stop_%d" % z] = stop
             stops["stop_number"] = len(qpx.data['trips']['tripOption'][x]['slice'][y]['segment'])
             segment['trip_%d' % y] = stops
-
+        for i in range(len(segment)):
+            start = arrow.get(segment['trip_%d' % i]['stop_0']['departureTime']).datetime
+            end = arrow.get(segment['trip_%d' % i]['stop_%d' % (len(segment['trip_%d' % i]) - 2)]['arrivalTime'])
+            minutes_differ = (end - start).total_seconds() / 60.0
+            duration += minutes_differ
+        option['duration'] = duration
         option['trips'] = segment
         return_data['option_%d' % x] = option
 
