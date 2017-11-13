@@ -74,8 +74,12 @@ def parse_hotel(raw_data, hotel_data):
         hotel['distanceFromCenter'] = raw_data['hotelList'][x]['proximityDistanceInMiles']
         hotel['checkInDate'] = hotel_data.checkin_date
         hotel['checkOutDate'] = hotel_data.checkout_date
-        return_data['hotel_%d' % x] = hotel
+        # if raw_data['hotelList'][x]['thumbnailUrl'] == null:
+        #     hotel[''] = "no image info"
+        # else:
+        hotel['thumbnailUrl'] = raw_data['hotelList'][x]['thumbnailUrl']
 
+        return_data['hotel_%d' % x] = hotel
     """ For debug only
 
     formated_return_data = json.dumps(
