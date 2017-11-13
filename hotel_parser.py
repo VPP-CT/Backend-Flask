@@ -8,7 +8,7 @@ from __future__ import print_function
 import requests
 import json
 
-returnedNum = 50  # only return top 50 hotel data
+returnedNum = 200  # only return top 50 hotel data
 
 
 def search_hotels(hotel_data):
@@ -58,7 +58,7 @@ def parse_hotel(raw_data):
     return_data = dict()
     # return_data['availableHotelCount'] = raw_data['availableHotelCount']
     # return_data['numberOfRoomsRequested'] = raw_data['numberOfRoomsRequested']
-    for x in range(returnedNum):
+    for x in range(len(raw_data['hotelList'])):
         hotel = dict()
         hotel['city'] = raw_data['hotelList'][x]['city']
         hotel['name'] = raw_data['hotelList'][x]['localizedName']
@@ -71,6 +71,7 @@ def parse_hotel(raw_data):
         hotel['guestRating'] = raw_data['hotelList'][x]['hotelGuestRating']
         hotel['starRating'] = raw_data['hotelList'][x]['hotelStarRating']
         hotel['rateWithTax'] = raw_data['hotelList'][x]['lowRateInfo']['formattedTotalPriceWithMandatoryFees']
+        hotel['distanceFromCenter'] = raw_data['hotelList'][x]['proximityDistanceInMiles']
         return_data['hotel_%d' % x] = hotel
 
     """ For debug only
