@@ -6,7 +6,6 @@ import arrow
 
 returnedNum = 200  # only return top 50 flight data
 
-
 def get_flights(raw_input):
     # type: (str) -> dict
     """Re-format the data into JSON format.
@@ -27,6 +26,7 @@ def get_flights(raw_input):
     return_data = dict()
     for x in range(len(qpx.data['trips']['tripOption'])):
         duration = 0
+
         option = dict()
         option['price'] = qpx.data['trips']['tripOption'][x]['saleTotal']
         segment = dict()
