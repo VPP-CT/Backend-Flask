@@ -41,10 +41,23 @@ def packages():
     package_data = dict()
 
     # cheapest flight& cheapest hotel(2 packages)
+    cheapest_flight_index = 'option_0'
+    for key, value in flight_result.iteritems():
+        rightOriginDest = True
+        for x in range(len(flight_result[key]['trips'])):
+            trip_cur = flight_result[key]['trips']['trip_%d' % x]
+            origin_cur = trip_cur['stop_%d' % (len(trip_cur) - 2)]['origin']
+            dest_cur = trip_cur['stop_0']['destination']
+            if origin_cur != request.args.get('origin%d' % x) or dest_cur != request.args.get('dest%d' % x):
+                rightOriginDest = False
+                break
+        if rightOriginDest:
+            cheapest_flight_index = key
+
     package_data_hotel = hotels_package(flight_result, 0, each_option_num, 1, "find_cheapest")
     for x in range(each_option_num):
         package_detail = dict()
-        package_detail['flight'] = flight_result['option_0']
+        package_detail['flight'] = flight_result[cheapest_flight_index]
         package_detail['hotel'] = package_data_hotel[x]
         package_detail['totalPrice'] = float(package_detail['flight']['price'][3:].replace(',', '')) + package_detail['hotel']['price']
         package_data['package_%d' % x] = package_detail
