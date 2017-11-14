@@ -39,10 +39,10 @@ def search_hotels(hotel_data):
     raw_response = requests.get("https://www.expedia.com/m/api/hotel/search/v3",
                                 params=param)
 
-    return parse_hotel(json.loads(raw_response.text))
+    return parse_hotel(json.loads(raw_response.text), hotel_data)
 
 
-def parse_hotel(raw_data):
+def parse_hotel(raw_data, hotel_data):
     # type: (object, str) -> object
     """Parser for hotel data JSON object.
 
@@ -56,8 +56,6 @@ def parse_hotel(raw_data):
 
     """
     return_data = dict()
-    # return_data['availableHotelCount'] = raw_data['availableHotelCount']
-    # return_data['numberOfRoomsRequested'] = raw_data['numberOfRoomsRequested']
     for x in range(len(raw_data['hotelList'])):
         hotel = dict()
         hotel['city'] = raw_data['hotelList'][x]['city']
@@ -72,8 +70,13 @@ def parse_hotel(raw_data):
         hotel['starRating'] = raw_data['hotelList'][x]['hotelStarRating']
         hotel['rateWithTax'] = raw_data['hotelList'][x]['lowRateInfo']['formattedTotalPriceWithMandatoryFees']
         hotel['distanceFromCenter'] = raw_data['hotelList'][x]['proximityDistanceInMiles']
+        hotel['checkInDate'] = hotel_data.checkin_date
+        hotel['checkOutDate'] = hotel_data.checkout_date
+        if 'thumbnailUrl' not in raw_data['hotelList'][x]:
+            hotel['thumbnailUrl'] = "no picture"
+        else:
+            hotel['thumbnailUrl'] = "http://images.trvl-media.com" + raw_data['hotelList'][x]['thumbnailUrl']
         return_data['hotel_%d' % x] = hotel
-
     """ For debug only
 
     formated_return_data = json.dumps(
