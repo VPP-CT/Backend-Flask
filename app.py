@@ -23,6 +23,7 @@ iata_client = IATACodesClient(open("iata.key", "r").read())
 
 # convert city name to geo
 geo = Nominatim()
+# https://geopy.readthedocs.io/en/1.10.0/
 
 each_option_num = 2
 
@@ -36,10 +37,10 @@ def packages():
     flight_result = flight()
     # return jsonify(flight_result['option_0'])
     package_data = dict()
-    package_detail = dict()
     # cheapest flight& cheapest hotel(2 packages)
     package_data_hotel = hotels_package(flight_result, 0, each_option_num, 1, "find_cheapest")
     for x in range(each_option_num):
+        package_detail = dict()
         package_detail['flight'] = flight_result['option_0']
         package_detail['hotel'] = package_data_hotel[x]
         package_detail['totalPrice'] = float(package_detail['flight']['price'][3:].replace(',', '')) + package_detail['hotel']['price']
@@ -61,6 +62,7 @@ def packages():
     
     package_data_hotel = hotels_package(flight_result, int(nonstop_flight_index[7:]), each_option_num, 1, "find_closest")
     for x in range(each_option_num):
+        package_detail = dict()
         package_detail['flight'] = flight_result[nonstop_flight_index]
         package_detail['hotel'] = package_data_hotel[x]
         package_detail['totalPrice'] = float(package_detail['flight']['price'][3:].replace(',', '')) + package_detail['hotel']['price']
@@ -78,6 +80,7 @@ def packages():
 
     package_data_hotel = hotels_package(flight_result, int(shortest_flight_index[7:]), each_option_num, 1, "find_star")
     for x in range(each_option_num):
+        package_detail = dict()
         package_detail['flight'] = flight_result[shortest_flight_index]
         package_detail['hotel'] = package_data_hotel[x]
         package_detail['totalPrice'] = float(package_detail['flight']['price'][3:].replace(',', '')) + package_detail['hotel']['price']
@@ -143,11 +146,11 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
         hotel_data.checkin_date = trip_cur['stop_%d' % (len(trip_cur) - 2)]['arrivalTime'][:10]
         hotel_data.checkout_date = trip_next['stop_0']['departureTime'][:10]
 
-        location = geo.geocode(trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
-        # print("the destination is", trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
-        # dess = iata_client.get(code=trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
-        # print("!!!the dest place city is", dess[0]['name'])
-        # location = geo.geocode(dess[0]['name'])
+        # location = geo.geocode(trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
+        print("the destination is", trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
+        dess = iata_client.get(code=trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
+        print("!!!the dest city is", dess[0]['name'])
+        location = geo.geocode(dess[0]['name'])
 
         hotel_data.latitude = location.latitude
         hotel_data.longitude = location.longitude
@@ -315,7 +318,6 @@ def hotels():
     hotel_data = hotel_data_obj()
     hotel_data.checkin_date = request.args.get('checkin')
     hotel_data.checkout_date = request.args.get('checkout')
-
     location = geo.geocode(request.args.get('city'))
     hotel_data.latitude = location.latitude
     hotel_data.longitude = location.longitude
