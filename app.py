@@ -11,6 +11,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from iata_codes.cities import IATACodesClient
 from collections import OrderedDict
+from geopy.geocoders import Nominatim
 
 
 app = Flask(__name__)
@@ -23,6 +24,9 @@ iata_client = IATACodesClient(open("iata.key", "r").read())
 
 # number of package for different category
 each_option_num = 2
+
+# convert city name to geo
+geo = Nominatim()
 
 
 @app.route('/')
