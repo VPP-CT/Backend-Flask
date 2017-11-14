@@ -4,6 +4,7 @@ from __future__ import print_function
 import flight_parser
 import hotel_parser
 import pdb
+import geocoder
 
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
@@ -88,6 +89,7 @@ def packages():
 
         # package_data['flight_%d' % (x + each_option_num * 2)] = flight_result[shortest_flight_index]
         # package_data['hotel_%d' % (x + each_option_num * 2)] = package_data_hotel[x]
+        
     return jsonify(package_data)
 
 '''
@@ -150,11 +152,15 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
         print("the destination is", trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
         dess = iata_client.get(code=trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
         print("!!!the dest city is", dess[0]['name'])
-        location = geo.geocode(dess[0]['name'])
+        g = geocoder.google(dess[0]['name'])
+        # location = geo.geocode(dess[0]['name'])
 
-        hotel_data.latitude = location.latitude
-        hotel_data.longitude = location.longitude
+        # hotel_data.latitude = location.latitude
+        # hotel_data.longitude = location.longitude
+        hotel_data.latitude = g.latlng[0]
+        hotel_data.longitude = g.latlng[1]
         hotel_result = hotel_parser.search_hotels(hotel_data)
+
         if purpose == "find_cheapest":
             hotel_results0['trip_%d' % x] = hotel_result['hotel_0']
             hotel_price0 = hotel_price0 + float(hotel_results0['trip_%d' % x]['rateWithTax'][2:].replace(',', ''))
