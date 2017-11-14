@@ -75,7 +75,7 @@ def parse_hotel(raw_data, hotel_data):
         if 'thumbnailUrl' not in raw_data['hotelList'][x]:
             hotel['thumbnailUrl'] = "no picture"
         else:
-            hotel['thumbnailUrl'] = raw_data['hotelList'][x]['thumbnailUrl']
+            hotel['thumbnailUrl'] = "http://images.trvl-media.com" + raw_data['hotelList'][x]['thumbnailUrl']
         return_data['hotel_%d' % x] = hotel
     """ For debug only
 

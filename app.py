@@ -3,14 +3,13 @@ from __future__ import print_function
 
 import flight_parser
 import hotel_parser
-import pdb
+import airport
 import geocoder
 import os
 
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from iata_codes.cities import IATACodesClient
-from geopy.geocoders import Nominatim
 from collections import OrderedDict
 
 
@@ -35,7 +34,7 @@ def packages():
     '''
     example query:
     http://0.0.0.0:80/packages?budget=2000&seg=3&origin1=nyc&dest1=sfo&date1=2017-11-15&origin2=sfo&dest2=lax&date2=2017-11-20&origin3=lax&dest3=nyc&date3=2017-11-25
-    
+
     '''
     flight_result = flight()
     package_data = dict()
@@ -62,7 +61,7 @@ def packages():
         package_detail['totalPrice'] = float(package_detail['flight']['price'][3:].replace(',', '')) + package_detail['hotel']['price']
         package_data['package_%d' % x] = package_detail
 
-    # cheapest flight with non stopover && cheapest hotel with closest distance to the center 
+    # cheapest flight with non stopover && cheapest hotel with closest distance to the center
     nonstop_flight_index = 'option_0'
     for key, value in flight_result.iteritems():
         nonstop = True
@@ -137,8 +136,8 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
         hotel_data = hotel_data_obj()
         hotel_data.checkin_date = trip_cur['stop_%d' % (len(trip_cur) - 2)]['arrivalTime'][:10]
         hotel_data.checkout_date = trip_next['stop_0']['departureTime'][:10]
-        dess = iata_client.get(code=trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
-        g = geocoder.google(dess[0]['name'])
+        dess = airport.find_city_by_IATA(trip_cur['stop_%d' % (len(trip_cur) -2)]['destination'])
+        g = geocoder.google(dess[0])
         hotel_data.latitude = g.latlng[0]
         hotel_data.longitude = g.latlng[1]
         hotel_result = hotel_parser.search_hotels(hotel_data)
@@ -154,7 +153,7 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
         if purpose == "find_closest":
             closest_hotel_index = []
             closest_hotel_index.append('hotel_0')
-            closest_hotel_index.append('hotel_0')            
+            closest_hotel_index.append('hotel_0')
             minimal_distance_hotel = float('inf')
             secminimal_distance_hotel = float('inf')
             for key, value in hotel_result.iteritems():
@@ -172,7 +171,7 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
             hotel_price1 = hotel_price0 + float(hotel_results1['trip_%d' % x]['rateWithTax'][2:].replace(',', ''))
         hotel_results0['price'] = hotel_price0
         hotel_results1['price'] = hotel_price1
-        
+
         if purpose == "find_star":
             # pdb.set_trace()
             star_hotel_index = []
@@ -185,7 +184,7 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
                 if small < 3.0 and float(hotel_result[key]['starRating']) > small :
                     star_hotel_index[0] = key
                     small = float(hotel_result[key]['starRating'])
-                elif secsmall < 3.0 and float(hotel_result[key]['starRating']) > secsmall:    
+                elif secsmall < 3.0 and float(hotel_result[key]['starRating']) > secsmall:
                     star_hotel_index[1] = key
                     secsmall = float(hotel_result[key]['starRating'])
                 if small >= 3.0 and secsmall >= 3.0:
@@ -198,7 +197,7 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
         hotel_results1['price'] = hotel_price1
 
     package_data_hotel.append(hotel_results0)
-    package_data_hotel.append(hotel_results1)    
+    package_data_hotel.append(hotel_results1)
 
     return package_data_hotel
 
