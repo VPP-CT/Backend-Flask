@@ -56,8 +56,6 @@ def parse_hotel(raw_data, hotel_data):
 
     """
     return_data = dict()
-    # return_data['availableHotelCount'] = raw_data['availableHotelCount']
-    # return_data['numberOfRoomsRequested'] = raw_data['numberOfRoomsRequested']
     for x in range(len(raw_data['hotelList'])):
         hotel = dict()
         hotel['city'] = raw_data['hotelList'][x]['city']
@@ -78,7 +76,6 @@ def parse_hotel(raw_data, hotel_data):
             hotel['thumbnailUrl'] = "no picture"
         else:
             hotel['thumbnailUrl'] = raw_data['hotelList'][x]['thumbnailUrl']
-
         return_data['hotel_%d' % x] = hotel
     """ For debug only
 
