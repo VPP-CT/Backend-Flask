@@ -145,10 +145,10 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
             minimal_distance_hotel = float('inf')
             secminimal_distance_hotel = float('inf')
             for key, value in hotel_result.iteritems():
-                if float(hotel_result[key]['distanceFromCenter']) < minimal_distance_hotel:
+                if minimal_distance_hotel >=4.0 and float(hotel_result[key]['distanceFromCenter']) < minimal_distance_hotel:
                     closest_hotel_index[0] = key
                     minimal_distance_hotel = float(hotel_result[key]['distanceFromCenter'])
-                elif float(hotel_result[key]['distanceFromCenter']) < secminimal_distance_hotel:
+                elif secminimal_distance_hotel >= 4.0 and float(hotel_result[key]['distanceFromCenter']) < secminimal_distance_hotel:
                     closest_hotel_index[1] = key
                     secminimal_distance_hotel = float(hotel_result[key]['distanceFromCenter'])
                 if minimal_distance_hotel < 4.0 and secminimal_distance_hotel < 4.0:
@@ -169,10 +169,10 @@ def hotels_package(flight_result, option_num, hotel_option_num, percent, purpose
             small = 0.0
             secsmall = 0.0
             for key, value in hotel_result.iteritems():
-                if float(hotel_result[key]['starRating']) > small:
+                if small < 3.0 and float(hotel_result[key]['starRating']) > small :
                     star_hotel_index[0] = key
                     small = float(hotel_result[key]['starRating'])
-                elif float(hotel_result[key]['starRating']) > secsmall:    
+                elif secsmall < 3.0 and float(hotel_result[key]['starRating']) > secsmall:    
                     star_hotel_index[1] = key
                     secsmall = float(hotel_result[key]['starRating'])
                 if small >= 3.0 and secsmall >= 3.0:
